@@ -28,7 +28,6 @@ class DoraCouponView @JvmOverloads constructor(
     private var textOrientation: Int = 1 // 0=horizontal,1=vertical
     private var holeRadius: Float = 20f
     private var dividerGap: Float = 20f
-    private val textEdgeGap: Float = 10f
 
     private val bgPaint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val holePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -104,49 +103,52 @@ class DoraCouponView @JvmOverloads constructor(
         }
     }
 
+    private fun dp2px(dp: Float): Float {
+        return dp * resources.displayMetrics.density
+    }
+
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         val w = width.toFloat()
         val h = height.toFloat()
         val radius = 30f
-
         // 背景
         canvas.drawRoundRect(RectF(0f, 0f, w, h), radius, radius, bgPaint)
-
         // 绘制凹槽
         if (holeType == 1 || holeType == 3) drawHorizontalHoles(canvas, w, h)
         if (holeType == 2 || holeType == 3) drawVerticalHoles(canvas, w, h)
-
+        // 外边距 5dp
+        val margin = dp2px(5f)
         // 绘制文字
         if (textOrientation == 1) { // vertical
             canvas.save()
             canvas.translate(
-                (w - 2 * textEdgeGap) / 2 - (titleLayout?.width ?: 0) / 2f,
-                (h / 3 - 2 * textEdgeGap) / 2f - (titleLayout?.height ?: 0) / 2
+                w / 2 - (titleLayout?.width ?: 0) / 2f,
+                (h / 3) / 2f - (titleLayout?.height ?: 0) / 2 + margin
             )
             titleLayout?.draw(canvas)
             canvas.restore()
 
             canvas.save()
             canvas.translate(
-                (w - 2 * textEdgeGap) / 2 - (contentLayout?.width ?: 0) / 2f,
-                h / 3 + (2 * h / 3f - 2 * textEdgeGap - (contentLayout?.height ?: 0)) / 2
+                w / 2 - (contentLayout?.width ?: 0) / 2f,
+                h / 3 + (2 * h / 3f - (contentLayout?.height ?: 0)) / 2 + margin
             )
             contentLayout?.draw(canvas)
             canvas.restore()
         } else { // horizontal
             canvas.save()
             canvas.translate(
-                (w / 3 - 2 * textEdgeGap) / 2f - (titleLayout?.width ?: 0) / 2,
-                (h - 2 * textEdgeGap) / 2 - (titleLayout?.height ?: 0) / 2f
+                (w / 3) / 2f - (titleLayout?.width ?: 0) / 2 + margin,
+                h / 2 - (titleLayout?.height ?: 0) / 2f
             )
             titleLayout?.draw(canvas)
             canvas.restore()
 
             canvas.save()
             canvas.translate(
-                w / 3 + (2 * w / 3f - 2 * textEdgeGap - (contentLayout?.width ?: 0)) / 2,
-                (h - 2 * textEdgeGap) / 2 - (contentLayout?.height ?: 0) / 2f
+                w / 3 + (2 * w / 3f - (contentLayout?.width ?: 0)) / 2 + margin,
+                h / 2 - (contentLayout?.height ?: 0) / 2f
             )
             contentLayout?.draw(canvas)
             canvas.restore()
