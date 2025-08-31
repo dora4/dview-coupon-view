@@ -1,25 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <resources>
+
     <declare-styleable name="DoraCouponView">
-        <!-- 标题和内容 -->
-        <attr name="dview_cv_couponTitle" format="string" />
-        <attr name="dview_cv_couponContent" format="string" />
-        <!-- 颜色 -->
-        <attr name="dview_cv_couponBgColor" format="color" />
-        <attr name="dview_cv_couponTitleColor" format="color" />
-        <attr name="dview_cv_couponContentColor" format="color" />
-        <!-- 分隔线相对宽度百分比 (0~1) -->
-        <attr name="dview_cv_dividerPercent" format="float" />
+        <!-- 文本 -->
+        <attr name="dview_cv_couponTitle" format="string"/>
+        <attr name="dview_cv_couponContent" format="string"/>
+        <attr name="dview_cv_couponBgColor" format="color"/>
+        <attr name="dview_cv_couponTitleColor" format="color"/>
+        <attr name="dview_cv_couponContentColor" format="color"/>
+
         <!-- 凹槽类型 -->
         <attr name="dview_cv_holeType" format="enum">
             <enum name="none" value="0"/>
-            <enum name="sides" value="1"/>     <!-- 左右 -->
-            <enum name="divider" value="2"/>   <!-- 虚线 -->
-            <enum name="both" value="3"/>      <!-- 左右+虚线 -->
+            <enum name="horizontal" value="1"/> <!-- 左右 -->
+            <enum name="vertical" value="2"/>   <!-- 上下 -->
+            <enum name="both" value="3"/>       <!-- 左右+上下 -->
         </attr>
-        <!-- 圆角和凹槽半径 -->
-        <attr name="dview_cv_cornerRadius" format="dimension" />
-        <attr name="dview_cv_holeRadius" format="dimension" />
+
+        <!-- 文本排列方向 -->
+        <attr name="dview_cv_textOrientation" format="enum">
+            <enum name="horizontal" value="0"/> <!-- 左右排列 -->
+            <enum name="vertical" value="1"/>   <!-- 上下排列 -->
+        </attr>
+
+        <!-- 凹槽半径 -->
+        <attr name="dview_cv_holeRadius" format="dimension"/>
+
+        <!-- 虚线间隔 -->
+        <attr name="dview_cv_dividerGap" format="dimension"/>
     </declare-styleable>
 </resources>
