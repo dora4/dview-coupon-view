@@ -21,11 +21,14 @@ class DoraCouponView @JvmOverloads constructor(
     private var bgColor: Int = Color.parseColor("#FF7043")
     private var titleColor: Int = Color.WHITE
     private var contentColor: Int = Color.WHITE
+    private var titleTextSize: Float = 56f
+    private var contentTextSize: Float = 36f
 
     private var holeType: Int = 0 // 0=none,1=horizontal,2=vertical,3=both
     private var textOrientation: Int = 1 // 0=horizontal,1=vertical
     private var holeRadius: Float = 20f
     private var dividerGap: Float = 20f
+    private val textEdgeGap: Float = 10f
 
     private val bgPaint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val holePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -52,24 +55,29 @@ class DoraCouponView @JvmOverloads constructor(
                 title = getString(R.styleable.DoraCouponView_dview_cv_couponTitle) ?: title
                 content = getString(R.styleable.DoraCouponView_dview_cv_couponContent) ?: content
                 bgColor = getColor(R.styleable.DoraCouponView_dview_cv_couponBgColor, bgColor)
-                titleColor =
-                    getColor(R.styleable.DoraCouponView_dview_cv_couponTitleColor, titleColor)
-                contentColor =
-                    getColor(R.styleable.DoraCouponView_dview_cv_couponContentColor, contentColor)
+                titleColor = getColor(R.styleable.DoraCouponView_dview_cv_couponTitleColor, titleColor)
+                contentColor = getColor(R.styleable.DoraCouponView_dview_cv_couponContentColor, contentColor)
                 holeType = getInt(R.styleable.DoraCouponView_dview_cv_holeType, 0)
                 textOrientation = getInt(R.styleable.DoraCouponView_dview_cv_textOrientation, 1)
-                holeRadius =
-                    getDimension(R.styleable.DoraCouponView_dview_cv_holeRadius, holeRadius)
-                dividerGap =
-                    getDimension(R.styleable.DoraCouponView_dview_cv_dividerGap, dividerGap)
+                holeRadius = getDimension(R.styleable.DoraCouponView_dview_cv_holeRadius, holeRadius)
+                dividerGap = getDimension(R.styleable.DoraCouponView_dview_cv_dividerGap, dividerGap)
+                titleTextSize = getDimension(R.styleable.DoraCouponView_dview_cv_couponTitleTextSize, titleTextSize)
+                contentTextSize = getDimension(R.styleable.DoraCouponView_dview_cv_couponContentTextSize, contentTextSize)
+
+                titlePaint.apply {
+                    color = titleColor
+                    textSize = titleTextSize
+                }
+                contentPaint.apply {
+                    color = contentColor
+                    textSize = contentTextSize
+                }
             } finally {
                 recycle()
             }
         }
 
         bgPaint.color = bgColor
-        titlePaint.apply { color = titleColor; textSize = 56f }
-        contentPaint.apply { color = contentColor; textSize = 36f }
         linePaint.pathEffect = DashPathEffect(floatArrayOf(dividerGap, dividerGap), 0f)
     }
 
@@ -113,32 +121,32 @@ class DoraCouponView @JvmOverloads constructor(
         if (textOrientation == 1) { // vertical
             canvas.save()
             canvas.translate(
-                w / 2 - (titleLayout?.width ?: 0) / 2f,
-                h / 6f - (titleLayout?.height ?: 0) / 2
+                (w - 2 * textEdgeGap) / 2 - (titleLayout?.width ?: 0) / 2f,
+                (h / 3 - 2 * textEdgeGap) / 2f - (titleLayout?.height ?: 0) / 2
             )
             titleLayout?.draw(canvas)
             canvas.restore()
 
             canvas.save()
             canvas.translate(
-                w / 2 - (contentLayout?.width ?: 0) / 2f,
-                h / 3 + (2 * h / 3f - (contentLayout?.height ?: 0)) / 2
+                (w - 2 * textEdgeGap) / 2 - (contentLayout?.width ?: 0) / 2f,
+                h / 3 + (2 * h / 3f - 2 * textEdgeGap - (contentLayout?.height ?: 0)) / 2
             )
             contentLayout?.draw(canvas)
             canvas.restore()
         } else { // horizontal
             canvas.save()
             canvas.translate(
-                w / 6f - (titleLayout?.width ?: 0) / 2,
-                h / 2 - (titleLayout?.height ?: 0) / 2f
+                (w / 3 - 2 * textEdgeGap) / 2f - (titleLayout?.width ?: 0) / 2,
+                (h - 2 * textEdgeGap) / 2 - (titleLayout?.height ?: 0) / 2f
             )
             titleLayout?.draw(canvas)
             canvas.restore()
 
             canvas.save()
             canvas.translate(
-                w / 3 + (2 * w / 3f - (contentLayout?.width ?: 0)) / 2,
-                h / 2 - (contentLayout?.height ?: 0) / 2f
+                w / 3 + (2 * w / 3f - 2 * textEdgeGap - (contentLayout?.width ?: 0)) / 2,
+                (h - 2 * textEdgeGap) / 2 - (contentLayout?.height ?: 0) / 2f
             )
             contentLayout?.draw(canvas)
             canvas.restore()
@@ -205,5 +213,17 @@ class DoraCouponView @JvmOverloads constructor(
 
     fun setCouponContentColor(color: Int) {
         contentColor = color; contentPaint.color = color; invalidate()
+    }
+
+    fun setCouponTitleTextSize(size: Float) {
+        titleTextSize = size
+        titlePaint.textSize = size
+        invalidate()
+    }
+
+    fun setCouponContentTextSize(size: Float) {
+        contentTextSize = size
+        contentPaint.textSize = size
+        invalidate()
     }
 }

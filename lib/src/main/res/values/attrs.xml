@@ -3,11 +3,13 @@
 
     <declare-styleable name="DoraCouponView">
         <!-- 文本 -->
-        <attr name="dview_cv_couponTitle" format="string"/>
-        <attr name="dview_cv_couponContent" format="string"/>
-        <attr name="dview_cv_couponBgColor" format="color"/>
-        <attr name="dview_cv_couponTitleColor" format="color"/>
-        <attr name="dview_cv_couponContentColor" format="color"/>
+        <attr name="dview_cv_couponTitle" format="string|reference"/>
+        <attr name="dview_cv_couponContent" format="string|reference"/>
+        <attr name="dview_cv_couponBgColor" format="color|reference"/>
+        <attr name="dview_cv_couponTitleTextSize" format="dimension|reference"/>
+        <attr name="dview_cv_couponContentTextSize" format="dimension|reference"/>
+        <attr name="dview_cv_couponTitleColor" format="color|reference"/>
+        <attr name="dview_cv_couponContentColor" format="color|reference"/>
 
         <!-- 凹槽类型 -->
         <attr name="dview_cv_holeType" format="enum">
@@ -24,9 +26,9 @@
         </attr>
 
         <!-- 凹槽半径 -->
-        <attr name="dview_cv_holeRadius" format="dimension"/>
+        <attr name="dview_cv_holeRadius" format="dimension|reference"/>
 
         <!-- 虚线间隔 -->
-        <attr name="dview_cv_dividerGap" format="dimension"/>
+        <attr name="dview_cv_dividerGap" format="dimension|reference"/>
     </declare-styleable>
 </resources>
