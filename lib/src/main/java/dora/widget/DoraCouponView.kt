@@ -32,16 +32,17 @@ class DoraCouponView @JvmOverloads constructor(
         color = Color.WHITE
         style = Paint.Style.STROKE
         strokeWidth = 4f
-        pathEffect = DashPathEffect(floatArrayOf(10f, 10f), 0f) // 虚线效果
+        pathEffect = DashPathEffect(floatArrayOf(10f, 10f), 0f)
     }
 
-    private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.WHITE
-        textSize = 48f
-        textAlign = Paint.Align.CENTER
-    }
+    // 默认字体大小范围
+    private val maxTitleSize = 56f
+    private val minTitleSize = 28f
+    private val maxContentSize = 36f
+    private val minContentSize = 20f
 
     init {
+        setLayerType(LAYER_TYPE_SOFTWARE, null) // 关闭硬件加速
         context.theme.obtainStyledAttributes(
             attrs,
             R.styleable.DoraCouponView,
@@ -59,11 +60,32 @@ class DoraCouponView @JvmOverloads constructor(
         }
         bgPaint.color = bgColor
         titlePaint.color = titleColor
-        titlePaint.textSize = 56f
-        titlePaint.textAlign = Paint.Align.CENTER
         contentPaint.color = contentColor
-        contentPaint.textSize = 36f
+    }
+
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+
+        // 可用宽度
+        val titleMaxWidth = w * 0.3f
+        val contentMaxWidth = w * 0.55f
+
+        // 动态调整字体大小
+        titlePaint.textSize = adjustTextSize(titlePaint, title, titleMaxWidth, maxTitleSize, minTitleSize)
+        contentPaint.textSize = adjustTextSize(contentPaint, content, contentMaxWidth, maxContentSize, minContentSize)
+
+        titlePaint.textAlign = Paint.Align.CENTER
         contentPaint.textAlign = Paint.Align.CENTER
+    }
+
+    private fun adjustTextSize(paint: Paint, text: String, maxWidth: Float, maxSize: Float, minSize: Float): Float {
+        var textSize = maxSize
+        paint.textSize = textSize
+        while (paint.measureText(text) > maxWidth && textSize > minSize) {
+            textSize -= 2f
+            paint.textSize = textSize
+        }
+        return textSize
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -73,23 +95,24 @@ class DoraCouponView @JvmOverloads constructor(
         val radius = 30f
         val rect = RectF(0f, 0f, width, height)
         canvas.drawRoundRect(rect, radius, radius, bgPaint)
-        // 绘制左右两个凹槽（票口）
+
+        // 绘制左右两个凹槽
         val holeRadius = 20f
-        canvas.drawCircle(0f, height / 2, holeRadius, Paint().apply {
-            xfermode = PorterDuffXfermode(
-            PorterDuff.Mode.CLEAR)
-        })
-        canvas.drawCircle(width, height / 2, holeRadius, Paint().apply {
-            xfermode = PorterDuffXfermode(
-            PorterDuff.Mode.CLEAR)
-        })
+        val holePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            xfermode = PorterDuffXfermode(PorterDuff.Mode.CLEAR)
+        }
+        canvas.drawCircle(0f, height / 2, holeRadius, holePaint)
+        canvas.drawCircle(width, height / 2, holeRadius, holePaint)
+
+        // 绘制虚线分隔线
         val path = Path().apply {
             moveTo(width * 0.35f, 0f)
             lineTo(width * 0.35f, height)
         }
         canvas.drawPath(path, linePaint)
-        canvas.drawText(title, width * 0.18f, height / 2 + 20f, textPaint)
-        textPaint.textSize = 36f
-        canvas.drawText(content, width * 0.7f, height / 2f, textPaint)
+
+        // 绘制文字
+        canvas.drawText(title, width * 0.18f, height / 2 + titlePaint.textSize / 2, titlePaint)
+        canvas.drawText(content, width * 0.7f, height / 2 + contentPaint.textSize / 2, contentPaint)
     }
 }
