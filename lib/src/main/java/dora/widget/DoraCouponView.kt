@@ -128,8 +128,8 @@ class DoraCouponView @JvmOverloads constructor(
             // 标题
             canvas.save()
             canvas.translate(
-                margin + (w - 2 * margin) / 2 - (titleLayout?.width ?: 0) / 2f, // x: 左右留白
-                margin + (h / 3) / 2f - (titleLayout?.height ?: 0) / 2           // y: 上下留白
+                margin + (w - 2 * margin) / 2 - (titleLayout?.width ?: 0) / 2f,
+                margin + (h / 3) / 2f - (titleLayout?.height ?: 0) / 2
             )
             titleLayout?.draw(canvas)
             canvas.restore()
