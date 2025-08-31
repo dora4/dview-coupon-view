@@ -1,3 +1,5 @@
+package dora.widget
+
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
