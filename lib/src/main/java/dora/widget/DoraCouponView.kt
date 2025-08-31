@@ -122,7 +122,7 @@ class DoraCouponView @JvmOverloads constructor(
             canvas.save()
             canvas.translate(
                 w / 2 - (contentLayout?.width ?: 0) / 2f,
-                h / 3f - (contentLayout?.height ?: 0) / 2
+                h * 2 / 3f - (contentLayout?.height ?: 0)
             )
             contentLayout?.draw(canvas)
             canvas.restore()
@@ -137,7 +137,7 @@ class DoraCouponView @JvmOverloads constructor(
 
             canvas.save()
             canvas.translate(
-                w / 3f - (contentLayout?.width ?: 0) / 2,
+                w * 2 / 3f - (contentLayout?.width ?: 0),
                 h / 2 - (contentLayout?.height ?: 0) / 2f
             )
             contentLayout?.draw(canvas)
