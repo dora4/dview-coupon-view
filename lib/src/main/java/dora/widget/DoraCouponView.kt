@@ -130,42 +130,26 @@ class DoraCouponView @JvmOverloads constructor(
     }
 
     private fun drawHorizontalHoles(canvas: Canvas, w: Float, h: Float) {
-        // 左右半圆 + 虚线
-        val path = Path()
-        val step = holeRadius * 2
-        var y = 0f
-        while (y <= h) {
-            canvas.drawCircle(0f, y, holeRadius, holePaint)
-            canvas.drawCircle(w, y, holeRadius, holePaint)
-            y += step
-        }
-        path.moveTo(0f, 0f)
-        path.lineTo(0f, h)
-        canvas.drawPath(path, linePaint)
+        // 左右半圆
+        canvas.drawCircle(0f, h / 2, holeRadius, holePaint)
+        canvas.drawCircle(w, h / 2, holeRadius, holePaint)
 
-        path.reset()
-        path.moveTo(w, 0f)
-        path.lineTo(w, h)
+        // 虚线连接左半圆和右半圆
+        val path = Path()
+        path.moveTo(holeRadius, h / 2)
+        path.lineTo(w - holeRadius, h / 2)
         canvas.drawPath(path, linePaint)
     }
 
     private fun drawVerticalHoles(canvas: Canvas, w: Float, h: Float) {
-        // 上下半圆 + 虚线
-        val path = Path()
-        val step = holeRadius * 2
-        var x = 0f
-        while (x <= w) {
-            canvas.drawCircle(x, 0f, holeRadius, holePaint)
-            canvas.drawCircle(x, h, holeRadius, holePaint)
-            x += step
-        }
-        path.moveTo(0f, 0f)
-        path.lineTo(w, 0f)
-        canvas.drawPath(path, linePaint)
+        // 上下半圆
+        canvas.drawCircle(w / 2, 0f, holeRadius, holePaint)
+        canvas.drawCircle(w / 2, h, holeRadius, holePaint)
 
-        path.reset()
-        path.moveTo(0f, h)
-        path.lineTo(w, h)
+        // 虚线连接上半圆和下半圆
+        val path = Path()
+        path.moveTo(w / 2, holeRadius)
+        path.lineTo(w / 2, h - holeRadius)
         canvas.drawPath(path, linePaint)
     }
 
