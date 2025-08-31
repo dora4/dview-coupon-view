@@ -35,7 +35,6 @@ class DoraCouponView @JvmOverloads constructor(
         color = Color.WHITE
         style = Paint.Style.STROKE
         strokeWidth = 2f
-        pathEffect = DashPathEffect(floatArrayOf(dividerGap, dividerGap), 0f)
     }
 
     private val titlePaint = TextPaint(Paint.ANTI_ALIAS_FLAG)
@@ -108,12 +107,12 @@ class DoraCouponView @JvmOverloads constructor(
         // 绘制文字
         if (textOrientation == 1) { // vertical
             canvas.save()
-            canvas.translate(w / 2 - (titleLayout?.width ?: 0) / 2f, h * 0.3f - (titleLayout?.height ?: 0)/2)
+            canvas.translate(w / 2 - (titleLayout?.width ?: 0) / 2f, h * 0.25f - (titleLayout?.height ?: 0)/2)
             titleLayout?.draw(canvas)
             canvas.restore()
 
             canvas.save()
-            canvas.translate(w / 2 - (contentLayout?.width ?: 0) / 2f, h * 0.6f - (contentLayout?.height ?: 0)/2)
+            canvas.translate(w / 2 - (contentLayout?.width ?: 0) / 2f, h * 0.65f - (contentLayout?.height ?: 0)/2)
             contentLayout?.draw(canvas)
             canvas.restore()
         } else { // horizontal
@@ -130,26 +129,30 @@ class DoraCouponView @JvmOverloads constructor(
     }
 
     private fun drawHorizontalHoles(canvas: Canvas, w: Float, h: Float) {
-        // 左右半圆
-        canvas.drawCircle(0f, h / 2, holeRadius, holePaint)
-        canvas.drawCircle(w, h / 2, holeRadius, holePaint)
+        val y = h / 2
+        // 左 30%
+        canvas.drawCircle(w * 0.3f, y, holeRadius, holePaint)
+        // 右 70%
+        canvas.drawCircle(w * 0.7f, y, holeRadius, holePaint)
 
-        // 虚线连接左半圆和右半圆
+        // 虚线
         val path = Path()
-        path.moveTo(holeRadius, h / 2)
-        path.lineTo(w - holeRadius, h / 2)
+        path.moveTo(w * 0.3f + holeRadius, y)
+        path.lineTo(w * 0.7f - holeRadius, y)
         canvas.drawPath(path, linePaint)
     }
 
     private fun drawVerticalHoles(canvas: Canvas, w: Float, h: Float) {
-        // 上下半圆
-        canvas.drawCircle(w / 2, 0f, holeRadius, holePaint)
-        canvas.drawCircle(w / 2, h, holeRadius, holePaint)
+        val x = w / 2
+        // 上 30%
+        canvas.drawCircle(x, h * 0.3f, holeRadius, holePaint)
+        // 下 70%
+        canvas.drawCircle(x, h * 0.7f, holeRadius, holePaint)
 
-        // 虚线连接上半圆和下半圆
+        // 虚线
         val path = Path()
-        path.moveTo(w / 2, holeRadius)
-        path.lineTo(w / 2, h - holeRadius)
+        path.moveTo(x, h * 0.3f + holeRadius)
+        path.lineTo(x, h * 0.7f - holeRadius)
         canvas.drawPath(path, linePaint)
     }
 
