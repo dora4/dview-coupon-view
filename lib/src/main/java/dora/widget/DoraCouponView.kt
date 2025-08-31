@@ -2,6 +2,9 @@ package dora.widget
 
 import android.content.Context
 import android.graphics.*
+import android.text.Layout
+import android.text.StaticLayout
+import android.text.TextPaint
 import android.util.AttributeSet
 import android.view.View
 import dora.widget.couponview.R
@@ -18,90 +21,152 @@ class DoraCouponView @JvmOverloads constructor(
     private var titleColor: Int = Color.WHITE
     private var contentColor: Int = Color.WHITE
 
-    private var dividerPercent: Float = 0.35f
-    private var holeType: Int = 2 // 默认虚线
-    private var cornerRadius: Float = 30f
-    private var holeRadius: Float = 20f
-
     private val bgPaint = Paint(Paint.ANTI_ALIAS_FLAG)
-    private val titlePaint = Paint(Paint.ANTI_ALIAS_FLAG)
-    private val contentPaint = Paint(Paint.ANTI_ALIAS_FLAG)
-    private val linePaint = Paint(Paint.ANTI_ALIAS_FLAG)
-    private val holePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        xfermode = PorterDuffXfermode(PorterDuff.Mode.CLEAR)
+    private val linePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.WHITE
+        style = Paint.Style.STROKE
+        strokeWidth = 4f
+        pathEffect = DashPathEffect(floatArrayOf(10f, 10f), 0f)
     }
 
+    private val titlePaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
+        textSize = 56f
+        color = titleColor
+    }
+    private val contentPaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
+        textSize = 36f
+        color = contentColor
+    }
+
+    private var titleLayout: StaticLayout? = null
+    private var contentLayout: StaticLayout? = null
+
     init {
-        setLayerType(LAYER_TYPE_SOFTWARE, null) // 关闭硬件加速才能CLEAR挖洞
-        context.theme.obtainStyledAttributes(attrs, R.styleable.DoraCouponView, 0, 0).apply {
+        setLayerType(LAYER_TYPE_SOFTWARE, null) // 关闭硬件加速，支持CLEAR挖洞
+        context.theme.obtainStyledAttributes(
+            attrs,
+            R.styleable.DoraCouponView,
+            0, 0
+        ).apply {
             try {
                 title = getString(R.styleable.DoraCouponView_dview_cv_couponTitle) ?: title
                 content = getString(R.styleable.DoraCouponView_dview_cv_couponContent) ?: content
                 bgColor = getColor(R.styleable.DoraCouponView_dview_cv_couponBgColor, bgColor)
                 titleColor = getColor(R.styleable.DoraCouponView_dview_cv_couponTitleColor, titleColor)
                 contentColor = getColor(R.styleable.DoraCouponView_dview_cv_couponContentColor, contentColor)
-                dividerPercent = getFloat(R.styleable.DoraCouponView_dview_cv_dividerPercent, dividerPercent)
-                holeType = getInt(R.styleable.DoraCouponView_dview_cv_holeType, holeType)
-                cornerRadius = getDimension(R.styleable.DoraCouponView_dview_cv_cornerRadius, cornerRadius)
-                holeRadius = getDimension(R.styleable.DoraCouponView_dview_cv_holeRadius, holeRadius)
             } finally {
                 recycle()
             }
         }
         bgPaint.color = bgColor
-
-        linePaint.color = Color.WHITE
-        linePaint.style = Paint.Style.STROKE
-        linePaint.strokeWidth = 4f
-        linePaint.pathEffect = DashPathEffect(floatArrayOf(10f, 10f), 0f)
-
         titlePaint.color = titleColor
-        titlePaint.textAlign = Paint.Align.CENTER
-        titlePaint.textSize = 56f
-
         contentPaint.color = contentColor
-        contentPaint.textAlign = Paint.Align.CENTER
-        contentPaint.textSize = 36f
+    }
+
+    @Suppress("DEPRECATION")
+    private fun buildStaticLayout(
+        text: String,
+        paint: TextPaint,
+        width: Int,
+        align: Layout.Alignment
+    ): StaticLayout {
+        return if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            StaticLayout.Builder.obtain(text, 0, text.length, paint, width)
+                .setAlignment(align)
+                .setLineSpacing(0f, 1f)
+                .setIncludePad(false)
+                .build()
+        } else {
+            // 旧版 API 21-22 用构造函数
+            StaticLayout(
+                text,
+                paint,
+                width,
+                align,
+                1f,   // spacingMult
+                0f,   // spacingAdd
+                false // includePad
+            )
+        }
+    }
+
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        if (w > 0) {
+            val titleWidth = (w * 0.3f).toInt()
+            val contentWidth = (w * 0.55f).toInt()
+
+            titleLayout = buildStaticLayout(title, titlePaint, titleWidth, Layout.Alignment.ALIGN_CENTER)
+            contentLayout = buildStaticLayout(content, contentPaint, contentWidth, Layout.Alignment.ALIGN_CENTER)
+        }
     }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-
         val w = width.toFloat()
         val h = height.toFloat()
+        val radius = 30f
 
         // 背景
-        canvas.drawRoundRect(RectF(0f, 0f, w, h), cornerRadius, cornerRadius, bgPaint)
+        val rect = RectF(0f, 0f, w, h)
+        canvas.drawRoundRect(rect, radius, radius, bgPaint)
 
-        val lineX = w * dividerPercent
-
-        // 画凹槽
-        when (holeType) {
-            1 -> { // 左右
-                canvas.drawCircle(0f, h / 2, holeRadius, holePaint)
-                canvas.drawCircle(w, h / 2, holeRadius, holePaint)
-            }
-            2 -> { // 虚线
-                canvas.drawCircle(lineX, 0f, holeRadius, holePaint)
-                canvas.drawCircle(lineX, h, holeRadius, holePaint)
-            }
-            3 -> { // 左右 + 虚线
-                canvas.drawCircle(0f, h / 2, holeRadius, holePaint)
-                canvas.drawCircle(w, h / 2, holeRadius, holePaint)
-                canvas.drawCircle(lineX, 0f, holeRadius, holePaint)
-                canvas.drawCircle(lineX, h, holeRadius, holePaint)
-            }
+        // 票口
+        val holeRadius = 20f
+        val holePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            xfermode = PorterDuffXfermode(PorterDuff.Mode.CLEAR)
         }
+        canvas.drawCircle(0f, h / 2, holeRadius, holePaint)
+        canvas.drawCircle(w, h / 2, holeRadius, holePaint)
 
-        // 分隔虚线
+        // 分隔线
         val path = Path().apply {
-            moveTo(lineX, 0f)
-            lineTo(lineX, h)
+            moveTo(w * 0.35f, 0f)
+            lineTo(w * 0.35f, h)
         }
         canvas.drawPath(path, linePaint)
 
-        // 绘制文字
-        canvas.drawText(title, w * dividerPercent / 2, h / 2 + titlePaint.textSize / 2, titlePaint)
-        canvas.drawText(content, (w + lineX) / 2, h / 2 + contentPaint.textSize / 2, contentPaint)
+        // 绘制 title
+        canvas.save()
+        canvas.translate(w * 0.05f, h / 2 - (titleLayout?.height ?: 0) / 2f)
+        titleLayout?.draw(canvas)
+        canvas.restore()
+
+        // 绘制 content
+        canvas.save()
+        canvas.translate(w * 0.4f, h / 2 - (contentLayout?.height ?: 0) / 2f)
+        contentLayout?.draw(canvas)
+        canvas.restore()
+    }
+
+    /** ========== 动态设置属性的方法 ========== */
+    fun setCouponTitle(text: String) {
+        this.title = text
+        requestLayout()
+        invalidate()
+    }
+
+    fun setCouponContent(text: String) {
+        this.content = text
+        requestLayout()
+        invalidate()
+    }
+
+    fun setCouponBgColor(color: Int) {
+        this.bgColor = color
+        bgPaint.color = color
+        invalidate()
+    }
+
+    fun setCouponTitleColor(color: Int) {
+        this.titleColor = color
+        titlePaint.color = color
+        invalidate()
+    }
+
+    fun setCouponContentColor(color: Int) {
+        this.contentColor = color
+        contentPaint.color = color
+        invalidate()
     }
 }
