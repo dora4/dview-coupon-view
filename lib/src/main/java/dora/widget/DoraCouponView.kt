@@ -112,42 +112,50 @@ class DoraCouponView @JvmOverloads constructor(
         val w = width.toFloat()
         val h = height.toFloat()
         val radius = 30f
+
         // 背景
         canvas.drawRoundRect(RectF(0f, 0f, w, h), radius, radius, bgPaint)
+
         // 绘制凹槽
         if (holeType == 1 || holeType == 3) drawHorizontalHoles(canvas, w, h)
         if (holeType == 2 || holeType == 3) drawVerticalHoles(canvas, w, h)
+
         // 外边距 5dp
         val margin = dp2px(5f)
+
         // 绘制文字
         if (textOrientation == 1) { // vertical
+            // 标题
             canvas.save()
             canvas.translate(
-                w / 2 - (titleLayout?.width ?: 0) / 2f,
-                (h / 3) / 2f - (titleLayout?.height ?: 0) / 2 + margin
+                margin + (w - 2 * margin) / 2 - (titleLayout?.width ?: 0) / 2f, // x: 左右留白
+                margin + (h / 3) / 2f - (titleLayout?.height ?: 0) / 2           // y: 上下留白
             )
             titleLayout?.draw(canvas)
             canvas.restore()
 
+            // 内容
             canvas.save()
             canvas.translate(
-                w / 2 - (contentLayout?.width ?: 0) / 2f,
-                h / 3 + (2 * h / 3f - (contentLayout?.height ?: 0)) / 2 + margin
+                margin + (w - 2 * margin) / 2 - (contentLayout?.width ?: 0) / 2f,
+                h / 3 + margin + (2 * h / 3f - (contentLayout?.height ?: 0)) / 2
             )
             contentLayout?.draw(canvas)
             canvas.restore()
         } else { // horizontal
+            // 标题
             canvas.save()
             canvas.translate(
-                (w / 3) / 2f - (titleLayout?.width ?: 0) / 2 + margin,
+                margin + (w / 3 - 2 * margin) / 2f - (titleLayout?.width ?: 0) / 2f,
                 h / 2 - (titleLayout?.height ?: 0) / 2f
             )
             titleLayout?.draw(canvas)
             canvas.restore()
 
+            // 内容
             canvas.save()
             canvas.translate(
-                w / 3 + (2 * w / 3f - (contentLayout?.width ?: 0)) / 2 + margin,
+                w / 3 + margin + ((2 * w / 3 - 2 * margin) - (contentLayout?.width ?: 0)) / 2f,
                 h / 2 - (contentLayout?.height ?: 0) / 2f
             )
             contentLayout?.draw(canvas)
