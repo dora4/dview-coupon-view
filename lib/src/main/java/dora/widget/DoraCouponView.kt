@@ -1,14 +1,7 @@
 package dora.widget
 
 import android.content.Context
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.DashPathEffect
-import android.graphics.Paint
-import android.graphics.Path
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffXfermode
-import android.graphics.RectF
+import android.graphics.*
 import android.util.AttributeSet
 import android.view.View
 import dora.widget.couponview.R
@@ -25,94 +18,90 @@ class DoraCouponView @JvmOverloads constructor(
     private var titleColor: Int = Color.WHITE
     private var contentColor: Int = Color.WHITE
 
+    private var dividerPercent: Float = 0.35f
+    private var holeType: Int = 2 // 默认虚线
+    private var cornerRadius: Float = 30f
+    private var holeRadius: Float = 20f
+
     private val bgPaint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val titlePaint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val contentPaint = Paint(Paint.ANTI_ALIAS_FLAG)
-    private val linePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.WHITE
-        style = Paint.Style.STROKE
-        strokeWidth = 4f
-        pathEffect = DashPathEffect(floatArrayOf(10f, 10f), 0f)
+    private val linePaint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val holePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        xfermode = PorterDuffXfermode(PorterDuff.Mode.CLEAR)
     }
 
-    // 默认字体大小范围
-    private val maxTitleSize = 56f
-    private val minTitleSize = 28f
-    private val maxContentSize = 36f
-    private val minContentSize = 20f
-
     init {
-        setLayerType(LAYER_TYPE_SOFTWARE, null) // 关闭硬件加速
-        context.theme.obtainStyledAttributes(
-            attrs,
-            R.styleable.DoraCouponView,
-            0, 0
-        ).apply {
+        setLayerType(LAYER_TYPE_SOFTWARE, null) // 关闭硬件加速才能CLEAR挖洞
+        context.theme.obtainStyledAttributes(attrs, R.styleable.DoraCouponView, 0, 0).apply {
             try {
                 title = getString(R.styleable.DoraCouponView_dview_cv_couponTitle) ?: title
                 content = getString(R.styleable.DoraCouponView_dview_cv_couponContent) ?: content
                 bgColor = getColor(R.styleable.DoraCouponView_dview_cv_couponBgColor, bgColor)
                 titleColor = getColor(R.styleable.DoraCouponView_dview_cv_couponTitleColor, titleColor)
                 contentColor = getColor(R.styleable.DoraCouponView_dview_cv_couponContentColor, contentColor)
+                dividerPercent = getFloat(R.styleable.DoraCouponView_dview_cv_dividerPercent, dividerPercent)
+                holeType = getInt(R.styleable.DoraCouponView_dview_cv_holeType, holeType)
+                cornerRadius = getDimension(R.styleable.DoraCouponView_dview_cv_cornerRadius, cornerRadius)
+                holeRadius = getDimension(R.styleable.DoraCouponView_dview_cv_holeRadius, holeRadius)
             } finally {
                 recycle()
             }
         }
         bgPaint.color = bgColor
+
+        linePaint.color = Color.WHITE
+        linePaint.style = Paint.Style.STROKE
+        linePaint.strokeWidth = 4f
+        linePaint.pathEffect = DashPathEffect(floatArrayOf(10f, 10f), 0f)
+
         titlePaint.color = titleColor
-        contentPaint.color = contentColor
-    }
-
-    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
-        super.onSizeChanged(w, h, oldw, oldh)
-
-        // 可用宽度
-        val titleMaxWidth = w * 0.3f
-        val contentMaxWidth = w * 0.55f
-
-        // 动态调整字体大小
-        titlePaint.textSize = adjustTextSize(titlePaint, title, titleMaxWidth, maxTitleSize, minTitleSize)
-        contentPaint.textSize = adjustTextSize(contentPaint, content, contentMaxWidth, maxContentSize, minContentSize)
-
         titlePaint.textAlign = Paint.Align.CENTER
-        contentPaint.textAlign = Paint.Align.CENTER
-    }
+        titlePaint.textSize = 56f
 
-    private fun adjustTextSize(paint: Paint, text: String, maxWidth: Float, maxSize: Float, minSize: Float): Float {
-        var textSize = maxSize
-        paint.textSize = textSize
-        while (paint.measureText(text) > maxWidth && textSize > minSize) {
-            textSize -= 2f
-            paint.textSize = textSize
-        }
-        return textSize
+        contentPaint.color = contentColor
+        contentPaint.textAlign = Paint.Align.CENTER
+        contentPaint.textSize = 36f
     }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        val width = width.toFloat()
-        val height = height.toFloat()
-        val radius = 30f
-        val rect = RectF(0f, 0f, width, height)
-        canvas.drawRoundRect(rect, radius, radius, bgPaint)
 
-        // 绘制左右两个凹槽
-        val holeRadius = 20f
-        val holePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            xfermode = PorterDuffXfermode(PorterDuff.Mode.CLEAR)
+        val w = width.toFloat()
+        val h = height.toFloat()
+
+        // 背景
+        canvas.drawRoundRect(RectF(0f, 0f, w, h), cornerRadius, cornerRadius, bgPaint)
+
+        val lineX = w * dividerPercent
+
+        // 画凹槽
+        when (holeType) {
+            1 -> { // 左右
+                canvas.drawCircle(0f, h / 2, holeRadius, holePaint)
+                canvas.drawCircle(w, h / 2, holeRadius, holePaint)
+            }
+            2 -> { // 虚线
+                canvas.drawCircle(lineX, 0f, holeRadius, holePaint)
+                canvas.drawCircle(lineX, h, holeRadius, holePaint)
+            }
+            3 -> { // 左右 + 虚线
+                canvas.drawCircle(0f, h / 2, holeRadius, holePaint)
+                canvas.drawCircle(w, h / 2, holeRadius, holePaint)
+                canvas.drawCircle(lineX, 0f, holeRadius, holePaint)
+                canvas.drawCircle(lineX, h, holeRadius, holePaint)
+            }
         }
-        canvas.drawCircle(0f, height / 2, holeRadius, holePaint)
-        canvas.drawCircle(width, height / 2, holeRadius, holePaint)
 
-        // 绘制虚线分隔线
+        // 分隔虚线
         val path = Path().apply {
-            moveTo(width * 0.35f, 0f)
-            lineTo(width * 0.35f, height)
+            moveTo(lineX, 0f)
+            lineTo(lineX, h)
         }
         canvas.drawPath(path, linePaint)
 
         // 绘制文字
-        canvas.drawText(title, width * 0.18f, height / 2 + titlePaint.textSize / 2, titlePaint)
-        canvas.drawText(content, width * 0.7f, height / 2 + contentPaint.textSize / 2, contentPaint)
+        canvas.drawText(title, w * dividerPercent / 2, h / 2 + titlePaint.textSize / 2, titlePaint)
+        canvas.drawText(content, (w + lineX) / 2, h / 2 + contentPaint.textSize / 2, contentPaint)
     }
 }
