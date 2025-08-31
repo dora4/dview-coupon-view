@@ -108,56 +108,48 @@ class DoraCouponView @JvmOverloads constructor(
         // 绘制文字
         if (textOrientation == 1) { // vertical
             canvas.save()
-            canvas.translate(w / 2 - (titleLayout?.width ?: 0) / 2f, h * 0.3f - (titleLayout?.height ?: 0)/2)
+            canvas.translate(w / 3 - (titleLayout?.width ?: 0) / 2f, h * 0.3f - (titleLayout?.height ?: 0)/2)
             titleLayout?.draw(canvas)
             canvas.restore()
 
             canvas.save()
-            canvas.translate(w / 2 - (contentLayout?.width ?: 0) / 2f, h * 0.6f - (contentLayout?.height ?: 0)/2)
+            canvas.translate(w / 3 - (contentLayout?.width ?: 0) / 2f, h * 0.6f - (contentLayout?.height ?: 0)/2)
             contentLayout?.draw(canvas)
             canvas.restore()
         } else { // horizontal
             canvas.save()
-            canvas.translate(w * 0.05f, h / 2 - (titleLayout?.height ?: 0) / 2f)
+            canvas.translate(w * 0.05f, h / 3 - (titleLayout?.height ?: 0) / 2f)
             titleLayout?.draw(canvas)
             canvas.restore()
 
             canvas.save()
-            canvas.translate(w * 0.4f, h / 2 - (contentLayout?.height ?: 0) / 2f)
+            canvas.translate(w * 0.4f, h / 3 - (contentLayout?.height ?: 0) / 2f)
             contentLayout?.draw(canvas)
             canvas.restore()
         }
     }
 
     private fun drawHorizontalHoles(canvas: Canvas, w: Float, h: Float) {
-        val y = h / 2
-        val xStart = w * 0.3f
-        val xEnd = w * 0.7f
-
         // 左右半圆
-        canvas.drawCircle(xStart, y, holeRadius, holePaint)
-        canvas.drawCircle(xEnd, y, holeRadius, holePaint)
+        canvas.drawCircle(0f, h / 3, holeRadius, holePaint)
+        canvas.drawCircle(w, h / 3, holeRadius, holePaint)
 
-        // 虚线
+        // 虚线连接左半圆和右半圆
         val path = Path()
-        path.moveTo(xStart + holeRadius, y)
-        path.lineTo(xEnd - holeRadius, y)
+        path.moveTo(holeRadius, h / 3)
+        path.lineTo(w - holeRadius, h / 3)
         canvas.drawPath(path, linePaint)
     }
 
     private fun drawVerticalHoles(canvas: Canvas, w: Float, h: Float) {
-        val x = w / 2
-        val yStart = h * 0.3f
-        val yEnd = h * 0.7f
-
         // 上下半圆
-        canvas.drawCircle(x, yStart, holeRadius, holePaint)
-        canvas.drawCircle(x, yEnd, holeRadius, holePaint)
+        canvas.drawCircle(w / 3, 0f, holeRadius, holePaint)
+        canvas.drawCircle(w / 3, h, holeRadius, holePaint)
 
-        // 虚线
+        // 虚线连接上半圆和下半圆
         val path = Path()
-        path.moveTo(x, yStart + holeRadius)
-        path.lineTo(x, yEnd - holeRadius)
+        path.moveTo(w / 3, holeRadius)
+        path.lineTo(w / 3, h - holeRadius)
         canvas.drawPath(path, linePaint)
     }
 
