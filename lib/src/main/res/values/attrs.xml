@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+    <declare-styleable name="DoraCouponView">
+        <attr name="dview_cv_couponTitle" format="string" />
+        <attr name="dview_cv_couponContent" format="string" />
+        <attr name="dview_cv_couponBgColor" format="color" />
+        <attr name="dview_cv_couponTitleColor" format="color" />
+        <attr name="dview_cv_couponContentColor" format="color" />
+    </declare-styleable>
+</resources>
