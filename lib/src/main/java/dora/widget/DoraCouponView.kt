@@ -8,6 +8,7 @@ import android.text.StaticLayout
 import android.text.TextPaint
 import android.util.AttributeSet
 import android.view.View
+import androidx.annotation.IntDef
 import dora.widget.couponview.R
 
 class DoraCouponView @JvmOverloads constructor(
@@ -21,11 +22,11 @@ class DoraCouponView @JvmOverloads constructor(
     private var bgColor: Int = Color.parseColor("#FF7043")
     private var titleColor: Int = Color.WHITE
     private var contentColor: Int = Color.WHITE
-    private var titleTextSize: Float = 56f
+    private var titleTextSize: Float = 48f
     private var contentTextSize: Float = 36f
 
-    private var holeType: Int = 0 // 0=none,1=horizontal,2=vertical,3=both
-    private var textOrientation: Int = 1 // 0=horizontal,1=vertical
+    private var holeType: Int = HOLE_TYPE_NONE
+    private var textOrientation: Int = TEXT_ORIENTATION_VERTICAL
     private var holeRadius: Float = 20f
     private var dividerGap: Float = 20f
 
@@ -56,8 +57,8 @@ class DoraCouponView @JvmOverloads constructor(
                 bgColor = getColor(R.styleable.DoraCouponView_dview_cv_couponBgColor, bgColor)
                 titleColor = getColor(R.styleable.DoraCouponView_dview_cv_couponTitleColor, titleColor)
                 contentColor = getColor(R.styleable.DoraCouponView_dview_cv_couponContentColor, contentColor)
-                holeType = getInt(R.styleable.DoraCouponView_dview_cv_holeType, 0)
-                textOrientation = getInt(R.styleable.DoraCouponView_dview_cv_textOrientation, 1)
+                holeType = getInt(R.styleable.DoraCouponView_dview_cv_holeType, holeType)
+                textOrientation = getInt(R.styleable.DoraCouponView_dview_cv_textOrientation, textOrientation)
                 holeRadius = getDimension(R.styleable.DoraCouponView_dview_cv_holeRadius, holeRadius)
                 dividerGap = getDimension(R.styleable.DoraCouponView_dview_cv_dividerGap, dividerGap)
                 titleTextSize = getDimension(R.styleable.DoraCouponView_dview_cv_couponTitleTextSize, titleTextSize)
@@ -83,8 +84,8 @@ class DoraCouponView @JvmOverloads constructor(
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
         if (w <= 0) return
-        val titleWidth = if (textOrientation == 1) w else (w / 3f).toInt()
-        val contentWidth = if (textOrientation == 1) w else (w * 2 / 3f).toInt()
+        val titleWidth = if (textOrientation == TEXT_ORIENTATION_VERTICAL) w else (w / 3f).toInt()
+        val contentWidth = if (textOrientation == TEXT_ORIENTATION_VERTICAL) w else (w * 2 / 3f).toInt()
 
         titleLayout = buildStaticLayout(title, titlePaint, titleWidth)
         contentLayout = buildStaticLayout(content, contentPaint, contentWidth)
@@ -103,10 +104,6 @@ class DoraCouponView @JvmOverloads constructor(
         }
     }
 
-    private fun dp2px(dp: Float): Float {
-        return dp * resources.displayMetrics.density
-    }
-
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         val w = width.toFloat()
@@ -120,16 +117,13 @@ class DoraCouponView @JvmOverloads constructor(
         if (holeType == 1 || holeType == 3) drawHorizontalHoles(canvas, w, h)
         if (holeType == 2 || holeType == 3) drawVerticalHoles(canvas, w, h)
 
-        // 外边距 5dp
-        val margin = dp2px(5f)
-
         // 绘制文字
-        if (textOrientation == 1) { // vertical
+        if (textOrientation == TEXT_ORIENTATION_VERTICAL) {
             // 标题
             canvas.save()
             canvas.translate(
-                margin + (w - 2 * margin) / 2 - (titleLayout?.width ?: 0) / 2f,
-                margin + (h / 3) / 2f - (titleLayout?.height ?: 0) / 2
+                w / 2 - (titleLayout?.width ?: 0) / 2f,
+                (h / 3) / 2f - (titleLayout?.height ?: 0) / 2
             )
             titleLayout?.draw(canvas)
             canvas.restore()
@@ -137,8 +131,8 @@ class DoraCouponView @JvmOverloads constructor(
             // 内容
             canvas.save()
             canvas.translate(
-                margin + (w - 2 * margin) / 2 - (contentLayout?.width ?: 0) / 2f,
-                h / 3 + margin + (2 * h / 3f - (contentLayout?.height ?: 0)) / 2
+                w / 2 - (contentLayout?.width ?: 0) / 2f,
+                h / 3 + (2 * h / 3f - (contentLayout?.height ?: 0)) / 2
             )
             contentLayout?.draw(canvas)
             canvas.restore()
@@ -146,7 +140,7 @@ class DoraCouponView @JvmOverloads constructor(
             // 标题
             canvas.save()
             canvas.translate(
-                margin + (w / 3 - 2 * margin) / 2f - (titleLayout?.width ?: 0) / 2f,
+                (w / 3) / 2f - (titleLayout?.width ?: 0) / 2f,
                 h / 2 - (titleLayout?.height ?: 0) / 2f
             )
             titleLayout?.draw(canvas)
@@ -155,7 +149,7 @@ class DoraCouponView @JvmOverloads constructor(
             // 内容
             canvas.save()
             canvas.translate(
-                w / 3 + margin + ((2 * w / 3 - 2 * margin) - (contentLayout?.width ?: 0)) / 2f,
+                w / 3 + ((2 * w / 3) - (contentLayout?.width ?: 0)) / 2f,
                 h / 2 - (contentLayout?.height ?: 0) / 2f
             )
             contentLayout?.draw(canvas)
@@ -188,11 +182,11 @@ class DoraCouponView @JvmOverloads constructor(
     }
 
     /** ===== 动态设置属性 ===== */
-    fun setHoleType(type: Int) {
+    fun setHoleType(@HoleType type: Int) {
         holeType = type; invalidate()
     }
 
-    fun setTextOrientation(orientation: Int) {
+    fun setTextOrientation(@TextOrientation orientation: Int) {
         textOrientation = orientation; requestLayout(); invalidate()
     }
 
@@ -226,14 +220,35 @@ class DoraCouponView @JvmOverloads constructor(
     }
 
     fun setCouponTitleTextSize(size: Float) {
-        titleTextSize = size
-        titlePaint.textSize = size
-        invalidate()
+        titleTextSize = size; titlePaint.textSize = size; invalidate()
     }
 
     fun setCouponContentTextSize(size: Float) {
-        contentTextSize = size
-        contentPaint.textSize = size
-        invalidate()
+        contentTextSize = size; contentPaint.textSize = size; invalidate()
     }
+
+    companion object {
+        const val HOLE_TYPE_NONE = 0
+        const val HOLE_TYPE_HORIZONTAL = 1
+        const val HOLE_TYPE_VERTICAL = 2
+        const val HOLE_TYPE_BOTH = 3
+        const val TEXT_ORIENTATION_HORIZONTAL = 0
+        const val TEXT_ORIENTATION_VERTICAL = 1
+    }
+
+    @IntDef(
+        HOLE_TYPE_NONE,
+        HOLE_TYPE_HORIZONTAL,
+        HOLE_TYPE_VERTICAL,
+        HOLE_TYPE_BOTH
+    )
+    @Retention(AnnotationRetention.SOURCE)
+    annotation class HoleType
+
+    @IntDef(
+        TEXT_ORIENTATION_HORIZONTAL,
+        TEXT_ORIENTATION_VERTICAL
+    )
+    @Retention(AnnotationRetention.SOURCE)
+    annotation class TextOrientation
 }
